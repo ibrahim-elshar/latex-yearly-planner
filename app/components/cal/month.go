@@ -139,3 +139,36 @@ func (m *Month) HeadingMOS() string {
   \resizebox{!}{\myLenHeaderResizeBox}{` + hyper.Target(m.Month.String(), m.Month.String()) + `\myDummyQ}
 \end{tabular}`
 }
+
+// GetHolidayText returns a LaTeX formatted string of all holidays in the month
+func (m *Month) GetHolidayText(large interface{}) string {
+	if m.Year == nil || m.Year.Holidays == nil {
+		return ""
+	}
+
+	var holidays []string
+	for _, week := range m.Weeks {
+		for _, day := range week.Days {
+			if day.Time.IsZero() || day.Time.Month() != m.Month {
+				continue
+			}
+			if holiday := m.Year.Holidays.ForDate(day.Time); holiday != nil {
+				holidays = append(holidays, 
+					strconv.Itoa(day.Time.Day()) + `: ` + holiday.Name)
+			}
+		}
+	}
+
+	if len(holidays) == 0 {
+		return ""
+	}
+
+	larg, _ := large.(bool)
+	if larg {
+		// For monthly view, keep centered with line breaks and larger font
+		return `\\ \textcolor{red}{\scriptsize ` + strings.Join(holidays, ` \\ `) + `}`
+	} else {
+		// For yearly view, single line in table row with tiny font
+		return `\textcolor{red}{\tiny ` + strings.Join(holidays, ` \quad `) + `}`
+	}
+}

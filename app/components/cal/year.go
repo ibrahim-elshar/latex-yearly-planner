@@ -13,14 +13,19 @@ type Year struct {
 	Number   int
 	Quarters Quarters
 	Weeks    Weeks
+	Holidays Holidays
 }
 
-func NewYear(wd time.Weekday, year int) *Year {
+func NewYear(wd time.Weekday, year int, addUSHolidays bool) *Year {
 	out := &Year{Number: year}
 	out.Weeks = NewWeeksForYear(wd, out)
 
 	for q := 1; q <= 4; q++ {
 		out.Quarters = append(out.Quarters, NewQuarter(wd, out, q))
+	}
+
+	if addUSHolidays {
+		out.Holidays = getUSHolidays(year)
 	}
 
 	return out

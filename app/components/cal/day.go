@@ -15,6 +15,7 @@ import (
 type Days []*Day
 type Day struct {
 	Time time.Time
+	Year *Year
 }
 
 func (d Day) Day(today, large interface{}) string {
@@ -23,17 +24,35 @@ func (d Day) Day(today, large interface{}) string {
 	}
 
 	day := strconv.Itoa(d.Time.Day())
+	
+	// Check for holiday
+	var holidayMark string
+	if d.Year != nil && d.Year.Holidays != nil {
+		if holiday := d.Year.Holidays.ForDate(d.Time); holiday != nil {
+			holidayMark = `\textcolor{red}{*}`
+		}
+	}
 
 	if larg, _ := large.(bool); larg {
-		return `\hyperlink{` + d.ref() + `}{\begin{tabular}{@{}p{5mm}@{}|}\hfil{}` + day + `\\ \hline\end{tabular}}`
+		dayText := day
+		if holidayMark != "" {
+			dayText = holidayMark + day
+		}
+		return `\hyperlink{` + d.ref() + `}{\begin{tabular}{@{}p{5mm}@{}|}\hfil{}` + dayText + `\\ \hline\end{tabular}}`
 	}
 
 	if td, ok := today.(Day); ok {
 		if d.Time.Equal(td.Time) {
+			if holidayMark != "" {
+				return texx.EmphCell(holidayMark + day)
+			}
 			return texx.EmphCell(day)
 		}
 	}
 
+	if holidayMark != "" {
+		return hyper.Link(d.ref(), holidayMark+day)
+	}
 	return hyper.Link(d.ref(), day)
 }
 
@@ -48,7 +67,7 @@ func (d Day) ref(prefix ...string) string {
 }
 
 func (d Day) Add(days int) Day {
-	return Day{Time: d.Time.AddDate(0, 0, days)}
+	return Day{Time: d.Time.AddDate(0, 0, days), Year: d.Year}
 }
 
 func (d Day) WeekLink() string {
@@ -125,7 +144,7 @@ func (d Day) Hours(bottom, top int) Days {
 	list := make(Days, 0, top-bottom+1)
 
 	for i := bottom; i <= top; i++ {
-		list = append(list, &Day{moment})
+		list = append(list, &Day{Time: moment, Year: d.Year})
 		moment = moment.Add(time.Hour)
 	}
 

@@ -15,5 +15,12 @@
       {{- else -}} & {{- end -}}
     {{- end -}}
   {{ end }}
+  {{- if not .Large -}}
+  \multicolumn{8}{l}{ {{- .Month.GetHolidayText .Large -}} }
+  {{- end }}
   {{ .Month.EndTable .TableType -}}
+  {{ if .Large -}}
+  \vspace{2mm}
+  {{ .Month.GetHolidayText .Large }}
+  {{- end -}}
 }

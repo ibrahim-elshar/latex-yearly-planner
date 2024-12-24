@@ -22,6 +22,7 @@ type Config struct {
 	ClearTopRightCorner bool
 	AMPMTime            bool
 	AddLastHalfHour     bool
+	AddUSHolidays       bool `yaml:"add_us_holidays"`
 
 	Pages Pages
 	Font  Font
