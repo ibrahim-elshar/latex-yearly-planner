@@ -29,7 +29,7 @@ func NewWeeksForMonth(wd time.Weekday, year *Year, qrtr *Quarter, month *Month) 
 	week := &Week{Weekday: wd, Year: year, Months: Months{month}, Quarters: Quarters{qrtr}}
 
 	for i := shift; i < 7; i++ {
-		week.Days[i] = Day{Time: ptr}
+		week.Days[i] = Day{Time: ptr, Year: year}
 		ptr = ptr.AddDate(0, 0, 1)
 	}
 
@@ -44,7 +44,7 @@ func NewWeeksForMonth(wd time.Weekday, year *Year, qrtr *Quarter, month *Month) 
 				break
 			}
 
-			week.Days[i] = Day{ptr}
+			week.Days[i] = Day{Time: ptr, Year: year}
 			ptr = ptr.AddDate(0, 0, 1)
 		}
 
@@ -55,7 +55,7 @@ func NewWeeksForMonth(wd time.Weekday, year *Year, qrtr *Quarter, month *Month) 
 }
 
 func NewWeeksForYear(wd time.Weekday, year *Year) Weeks {
-	ptr := selectStartWeek(year.Number, wd)
+	ptr := selectStartWeek(year.Number, wd, year)
 
 	qrtr1 := NewQuarter(wd, year, 1)
 	mon1 := NewMonth(wd, year, qrtr1, time.January)
@@ -91,20 +91,10 @@ func fillWeekly(wd time.Weekday, year *Year, ptr Day) *Week {
 		ptr = ptr.Add(1)
 	}
 
-	if week.quarterOverlap() {
-		qrtr = NewQuarter(wd, year, week.rightQuarter())
-		week.Quarters = append(week.Quarters, qrtr)
-	}
-
-	if week.monthOverlap() {
-		month = NewMonth(wd, year, qrtr, week.rightMonth())
-		week.Months = append(week.Months, month)
-	}
-
 	return week
 }
 
-func selectStartWeek(year int, weekStart time.Weekday) Day {
+func selectStartWeek(year int, weekStart time.Weekday, yearPtr *Year) Day {
 	soy := time.Date(year, time.January, 1, 0, 0, 0, 0, time.Local)
 	sow := soy
 
@@ -116,7 +106,7 @@ func selectStartWeek(year int, weekStart time.Weekday) Day {
 		sow = sow.AddDate(0, 0, -7)
 	}
 
-	return Day{Time: sow}
+	return Day{Time: sow, Year: yearPtr}
 }
 
 func (w *Week) WeekNumber(large interface{}) string {

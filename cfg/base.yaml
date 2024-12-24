@@ -5,6 +5,7 @@ blank: false
 grid: true
 calafterschedule: false
 addlasthalfhour: true
+add_us_holidays: true
 
 font:
   family: "Helvetica"
