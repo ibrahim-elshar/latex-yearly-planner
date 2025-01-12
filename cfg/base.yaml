@@ -63,4 +63,4 @@ layout:
   colors:
     gray: gray
     lightgray: gray!50
-    verylightgray: gray!20
+    verylightgray: gray!50
